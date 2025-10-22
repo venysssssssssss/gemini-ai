@@ -1,0 +1,354 @@
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Guia de Configuração Gemini AI para VS Code</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <!-- Chosen Palette: Tech Calm -->
+        <!-- Application Structure Plan: Designed a tab-based SPA. A persistent sidebar navigation allows users to switch between different technology domains (Software Eng, Data Science, etc.). This task-oriented structure is better than a linear report, letting users immediately access relevant configurations. The main content area dynamically updates with domain-specific tables, best-practice text blocks, and an interactive chart comparing the impact of each setting. This approach was chosen for user efficiency and direct access to actionable information. -->
+        <!-- Visualization & Content Choices: Report Info: Best Gemini settings per domain. -> Goal: Compare, Inform, Organize. -> Viz/Presentation: Interactive tabs (HTML/JS), summary tables (HTML), and a horizontal bar chart (Chart.js/Canvas) to visually weigh the importance of settings. Interaction: Clicking tabs updates all content and the chart dynamically. Justification: This provides a clear, hierarchical, and visually comparative way to explore complex configuration data without overwhelming the user. CONFIRMED NO SVG/Mermaid used. -->
+        <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f8fafc;
+            }
+            .chart-container {
+                position: relative;
+                width: 100%;
+                max-width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+                height: 350px;
+                max-height: 400px;
+            }
+            @media (max-width: 768px) {
+                .chart-container {
+                    height: 300px;
+                }
+            }
+            .nav-item.active {
+                background-color: #06b6d4;
+                color: white;
+                font-weight: 600;
+            }
+            .nav-item {
+                transition: all 0.2s ease-in-out;
+            }
+            .nav-item:hover {
+                background-color: #0891b2;
+                color: white;
+            }
+        </style>
+    </head>
+    <body class="text-slate-800">
+
+        <div class="min-h-screen flex flex-col md:flex-row">
+            <aside class="w-full md:w-64 bg-slate-800 text-white p-4 md:p-6 flex-shrink-0">
+                <h1 class="text-2xl font-bold mb-6 text-cyan-300">Guia Gemini AI</h1>
+                <nav id="navigation" class="flex flex-row md:flex-col gap-2 overflow-x-auto pb-2">
+                </nav>
+            </aside>
+
+            <main id="main-content" class="flex-1 p-4 md:p-8 lg:p-10 overflow-y-auto">
+            </main>
+        </div>
+
+        <script>
+            const appData = {
+                overview: {
+                    title: "Visão Geral e Boas Práticas",
+                    navTitle: "Visão Geral",
+                    description: "Este guia oferece as melhores configurações e protocolos de contexto para otimizar o uso do Gemini Assistant no VS Code, especialmente em um ambiente com Windows 11 e WSL2 (Ubuntu). As recomendações a seguir são a base para um fluxo de trabalho eficiente em todas as áreas de desenvolvimento.",
+                    content: [
+                        {
+                            type: 'heading',
+                            text: 'Configuração Essencial do VS Code'
+                        },
+                        {
+                            type: 'paragraph',
+                            text: 'Para garantir que o Gemini receba apenas o contexto relevante, é crucial configurar seu ambiente para excluir arquivos e pastas desnecessários. Isso melhora a precisão das respostas e economiza tokens. Adicione as seguintes configurações ao seu `settings.json` do VS Code (`Ctrl+Shift+P` > `Open User Settings (JSON)`).'
+                        },
+                        {
+                            type: 'code',
+                            language: 'json',
+                            code: `{
+        "genie.exclude": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/*.lock",
+            "**/.vscode/**"
+        ],
+        "genie.inlineSuggest.enable": true,
+        "genie.codeActions.enabled": true
+    }`
+                        },
+                        {
+                            type: 'heading',
+                            text: 'Protocolos de Contexto Fundamentais (MCPs)'
+                        },
+                        {
+                            type: 'list',
+                            items: [
+                                '<strong>Seja Específico e Claro:</strong> Formule sua pergunta ou comando de forma direta. Em vez de "corrija meu código", use "Meu componente React não está renderizando a lista de usuários. O erro é X. Aqui está o código do componente."',
+                                '<strong>Forneça o Contexto Relevante:</strong> Inclua snippets de código, mensagens de erro completas, a estrutura de arquivos (`tree -L 2` no terminal WSL) e as versões das principais bibliotecas.',
+                                '<strong>Defina o Objetivo:</strong> Informe ao Gemini o que você deseja alcançar. Por exemplo: "Quero refatorar esta função Python para ser mais performática usando `asyncio`."',
+                                '<strong>Itere e Refine:</strong> Se a primeira resposta não for perfeita, refine sua pergunta com mais detalhes ou correções. Trate a interação como uma conversa contínua.'
+                            ]
+                        }
+                    ],
+                    chartData: null
+                },
+                software_engineering: {
+                    title: "Engenharia de Software",
+                    navTitle: "Eng. de Software",
+                    description: "Na engenharia de software geral, a clareza sobre arquitetura, algoritmos e controle de versão é fundamental. Fornecer contexto sobre o design do sistema e o problema específico a ser resolvido resulta em respostas mais úteis e aplicáveis.",
+                    tableData: [
+                        { setting: 'Extensão GitLens', recommendation: 'Instalada e ativa', why: 'Facilita a inclusão do histórico de commits e do contexto de alterações de código no seu prompt.' },
+                        { setting: 'Comando `tree` no WSL', recommendation: 'Use `tree -L 2` ou `tree -L 3`', why: 'Fornece ao Gemini uma visão clara da estrutura do seu projeto, essencial para questões de arquitetura.' },
+                        { setting: 'Testes Unitários', recommendation: 'Inclua testes (falhando ou passando)', why: 'Define o comportamento esperado do código e ajuda o Gemini a entender os requisitos exatos.' },
+                        { setting: 'Diagramas em ASCII', recommendation: 'Descreva fluxos ou arquiteturas', why: 'Ajuda a explicar sistemas complexos de forma concisa quando um diagrama visual não pode ser compartilhado.' }
+                    ],
+                    chartData: {
+                        labels: ['Contexto de Testes', 'Estrutura de Arquivos (tree)', 'Histórico do Git', 'Diagramas ASCII'],
+                        data: [9, 8, 7, 6],
+                        title: 'Impacto da Configuração na Qualidade da Resposta'
+                    }
+                },
+                data_science_ml: {
+                    title: "Ciência de Dados & Machine Learning",
+                    navTitle: "Ciência de Dados",
+                    description: "Para ciência de dados e ML, o contexto sobre os dados, bibliotecas e o objetivo do modelo é mais importante do que o código em si. Descreva a forma dos dados, as distribuições e o problema de negócio que você está tentando resolver.",
+                    tableData: [
+                        { setting: 'Versões de Bibliotecas', recommendation: '`pandas.__version__`, `torch.__version__`', why: 'Evita problemas de compatibilidade e uso de APIs depreciadas nas sugestões do Gemini.' },
+                        { setting: 'Schema dos Dados', recommendation: 'Inclua a saída de `df.info()` e `df.head()`', why: 'Informa ao Gemini sobre os tipos de dados, valores nulos e a estrutura geral do seu dataset.' },
+                        { setting: 'Métricas de Avaliação', recommendation: 'Especifique (ex: Acurácia, F1-Score, RMSE)', why: 'Orienta o Gemini na otimização do código para a métrica de sucesso correta.' },
+                        { setting: 'Extensão Jupyter Notebook', recommendation: 'Use o editor nativo do VS Code', why: 'Permite executar e compartilhar células de código e suas saídas facilmente como contexto.' }
+                    ],
+                    chartData: {
+                        labels: ['Schema dos Dados', 'Métricas de Avaliação', 'Versões de Bibliotecas', 'Contexto do Notebook'],
+                        data: [10, 8, 7, 7],
+                        title: 'Impacto do Contexto em Projetos de Ciência de Dados'
+                    }
+                },
+                react_typescript: {
+                    title: "React, TypeScript & UI/UX",
+                    navTitle: "React & TS",
+                    description: "No desenvolvimento frontend, especialmente com React e TypeScript, o contexto visual e de tipagem é crucial. Descreva o comportamento desejado da UI e forneça as interfaces e tipos para obter o máximo do Gemini.",
+                    tableData: [
+                        { setting: 'Interfaces e Tipos (TS)', recommendation: 'Sempre inclua as definições de tipos', why: 'Permite que o Gemini gere código type-safe e entenda a forma dos seus dados e props.' },
+                        { setting: 'Estrutura de Componentes', recommendation: 'Descreva a hierarquia (Pai > Filho)', why: 'Ajuda na gestão de estado e fluxo de props. Ex: "O componente `List` renderiza vários `ListItem`".' },
+                        { setting: 'Bibliotecas de UI', recommendation: 'Mencione (ex: Tailwind CSS, Material-UI)', why: 'Garante que as sugestões de código utilizem as classes e componentes corretos do seu framework.' },
+                        { setting: 'Descrição do Comportamento', recommendation: 'Descreva a interação do usuário', why: 'Para UI/UX, explique o que deve acontecer. Ex: "Ao clicar no botão, um modal deve aparecer".' }
+                    ],
+                    chartData: {
+                        labels: ['Definições de Tipos (TS)', 'Descrição do Comportamento', 'Estrutura de Componentes', 'Bibliotecas de UI'],
+                        data: [10, 9, 7, 8],
+                        title: 'Impacto do Contexto no Desenvolvimento Frontend'
+                    }
+                },
+                docker_dbs: {
+                    title: "Docker & Bancos de Dados",
+                    navTitle: "Docker & DBs",
+                    description: "Para DevOps e gerenciamento de dados, o contexto está nos arquivos de configuração e nos schemas. Forneça o conteúdo do seu `Dockerfile`, `docker-compose.yml` ou o DDL do seu banco de dados.",
+                    tableData: [
+                        { setting: 'Arquivo `Dockerfile`', recommendation: 'Forneça o arquivo completo', why: 'Permite ao Gemini depurar problemas de build, otimizar camadas e sugerir melhores práticas.' },
+                        { setting: 'Schema do Banco de Dados', recommendation: 'Inclua os comandos `CREATE TABLE`', why: 'Essencial para que o Gemini escreva queries SQL corretas e otimizadas para sua estrutura.' },
+                        { setting: 'Logs de Erro', recommendation: 'Copie a saída completa do container/serviço', why: 'A mensagem de erro exata é o ponto de partida mais importante para a depuração.' },
+                        { setting: 'Versão do SGBD/Docker', recommendation: 'Especifique (ex: PostgreSQL 15, Docker 20.10)', why: 'Funcionalidades e sintaxes podem variar drasticamente entre versões.' }
+                    ],
+                    chartData: {
+                        labels: ['Logs de Erro Completos', 'Schema do DB / Dockerfile', 'Versão da Ferramenta', 'Configurações de Rede'],
+                        data: [10, 9, 7, 6],
+                        title: 'Impacto do Contexto em Ambientes e Dados'
+                    }
+                }
+            };
+
+            let currentChart = null;
+            let activeDomain = 'overview';
+
+            const mainContent = document.getElementById('main-content');
+            const navigation = document.getElementById('navigation');
+
+            function renderContent(domain) {
+                const data = appData[domain];
+                if (!data) return;
+
+                activeDomain = domain;
+                updateNavStyles();
+
+                mainContent.innerHTML = ''; 
+
+                let contentHtml = `<h2 class="text-3xl md:text-4xl font-bold mb-4 text-slate-900">${data.title}</h2>
+                                <p class="text-lg text-slate-600 mb-8">${data.description}</p>`;
+
+                if (data.content) {
+                    data.content.forEach(item => {
+                        switch (item.type) {
+                            case 'heading':
+                                contentHtml += `<h3 class="text-2xl font-semibold mt-8 mb-4">${item.text}</h3>`;
+                                break;
+                            case 'paragraph':
+                                contentHtml += `<p class="mb-4 text-slate-700">${item.text}</p>`;
+                                break;
+                            case 'code':
+                                contentHtml += `<div class="bg-slate-800 text-white p-4 rounded-lg my-4 overflow-x-auto">
+                                                    <pre><code class="language-${item.language}">${item.code}</code></pre>
+                                                </div>`;
+                                break;
+                            case 'list':
+                                contentHtml += `<ul class="list-disc list-inside space-y-2 mb-4">`;
+                                item.items.forEach(li => {
+                                    contentHtml += `<li class="text-slate-700">${li}</li>`;
+                                });
+                                contentHtml += `</ul>`;
+                                break;
+                        }
+                    });
+                }
+                
+                if (data.tableData) {
+                    contentHtml += `<h3 class="text-2xl font-semibold mt-8 mb-4">Configurações e Protocolos</h3>
+                                    <div class="overflow-x-auto bg-white rounded-lg shadow">
+                                        <table class="w-full text-left">
+                                            <thead class="bg-slate-100">
+                                                <tr>
+                                                    <th class="p-4 font-semibold">Configuração/Ferramenta</th>
+                                                    <th class="p-4 font-semibold">Recomendação</th>
+                                                    <th class="p-4 font-semibold">Justificativa (Protocolo de Contexto)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>`;
+                    data.tableData.forEach(row => {
+                        contentHtml += `<tr class="border-t border-slate-200">
+                                            <td class="p-4 font-medium">${row.setting}</td>
+                                            <td class="p-4">${row.recommendation}</td>
+                                            <td class="p-4 text-slate-600">${row.why}</td>
+                                        </tr>`;
+                    });
+                    contentHtml += `</tbody></table></div>`;
+                }
+
+                if (data.chartData) {
+                    contentHtml += `<h3 class="text-2xl font-semibold mt-12 mb-4">Visualização de Impacto</h3>
+                                    <div class="bg-white p-4 md:p-6 rounded-lg shadow">
+                                        <div class="chart-container">
+                                            <canvas id="domainChart"></canvas>
+                                        </div>
+                                    </div>`;
+                }
+
+                mainContent.innerHTML = contentHtml;
+
+                if (data.chartData) {
+                    renderChart(data.chartData);
+                }
+            }
+
+            function renderChart(chartData) {
+                const ctx = document.getElementById('domainChart');
+                if (!ctx) return;
+
+                if (currentChart) {
+                    currentChart.destroy();
+                }
+
+                currentChart = new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Nível de Impacto (0-10)',
+                            data: chartData.data,
+                            backgroundColor: '#06b6d4',
+                            borderColor: '#0891b2',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: {
+                                    color: '#e2e8f0'
+                                }
+                            },
+                            y: {
+                            grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: chartData.title,
+                                font: {
+                                    size: 16
+                                },
+                                padding: {
+                                    bottom: 20
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: '#0f172a',
+                                titleFont: {
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 14
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` Impacto: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function setupNavigation() {
+                Object.keys(appData).forEach(key => {
+                    const data = appData[key];
+                    const navButton = document.createElement('button');
+                    navButton.textContent = data.navTitle;
+                    navButton.dataset.domain = key;
+                    navButton.className = 'nav-item w-full text-left px-4 py-2 rounded-md text-sm md:text-base';
+                    navButton.addEventListener('click', () => renderContent(key));
+                    navigation.appendChild(navButton);
+                });
+            }
+
+            function updateNavStyles() {
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    if (item.dataset.domain === activeDomain) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                setupNavigation();
+                renderContent('overview');
+            });
+        </script>
+    </body>
+    </html>
